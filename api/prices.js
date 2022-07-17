@@ -1,15 +1,18 @@
 const { allowCors } = require("../util");
 const prices = require('./best.json')
+const meta = require('./instance-meta.json');
 
 export default allowCors((req, res) => {
     const {
-        query: { maxPrice, minCpu, minMemory, region, arch, generation, sortBy },
+        query: { maxPrice, minCpu, minMemory, region, arch, generation, sortBy, include },
     } = req;
 
     console.log(maxPrice, minCpu, minMemory, region, arch, generation, sortBy);
     const _arch = arch;
     const _generation = generation;
     const _region = region;
+
+    const toInclude = include ? include : [];
 
     const filtered = prices.filter(
         ({ spot_max, spot_min, vcpus, memory, arch, generation, region }) => {
@@ -24,6 +27,18 @@ export default allowCors((req, res) => {
         }
     );
 
+    if (toInclude.length > 0) {
+        filtered.forEach((price) => {
+            const instance = price.instance;
+            const instanceMeta = meta[instance];
+
+            toInclude.forEach((include) => {
+                price[include] = instanceMeta[include];
+            }
+            );
+        });
+    }
+
     if (sortBy) {
         // check if is numeric
         if (!isNaN(parseFloat(prices[0][sortBy]))) {
@@ -32,6 +47,7 @@ export default allowCors((req, res) => {
             filtered.sort((a, b) => a[sortBy.toLowerCase()].localeCompare(b[sortBy.toLowerCase()]));
         }
     }
+
 
     if (filtered.length === 0) {
         res.status(404).json({ message: "Not found" });

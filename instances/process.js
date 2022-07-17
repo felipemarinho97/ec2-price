@@ -14,3 +14,4 @@ const imap = JSON.stringify(iMap, null, 2)
 // console.log(JSON.stringify(instances[0]))
 
 fs.writeFileSync('./imap.json', imap)
+fs.writeFileSync('./api/instance-meta.json', JSON.stringify(iMap))

@@ -13,6 +13,12 @@ export default allowCors((req, res) => {
         return;
     }
 
+    if (field === 'include') {
+        const meta = require('./instance-meta.json');
+        res.json(Object.keys(meta['t2.micro']));
+        return;
+    }
+
     if (prices[0][field] === undefined) {
         res.status(404).json({ message: "Not found" });
         return;

@@ -1,5 +1,6 @@
 const spot_prices = require('./spot_prices.json')
 const imap = require('./instances/imap.json')
+const fs = require('fs')
 
 const plist = []
 
@@ -37,6 +38,8 @@ sortBy('spot_max')
 
 // to JSON
 console.log(JSON.stringify(plist, null, 2))
+fs.writeFileSync('./api/best.json', JSON.stringify(plist))
+
 
 // to CSV
 // const csv = ['instance,region,spot_max,spot_min,spot_avg,vcpus,memory,arch,genration']

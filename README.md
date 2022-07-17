@@ -4,7 +4,7 @@ A website made for looking up spot prices of EC2 instances.
 
 Access here: https://ec2-price.vercel.app
 
-It also has a API with the same filters available at: https://ec2-price.vercel.app/api/prices
+It also has a API with the same filters available at: https://ec2-price.vercel.app/api/prices?maxPrice=&minCpu=&minMemory=&region=&arch=&generation=&sortBy=
 
 ## Updating
 

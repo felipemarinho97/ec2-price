@@ -12,7 +12,7 @@ export default allowCors((req, res) => {
     const _generation = generation;
     const _region = region;
 
-    const toInclude = include ? include : [];
+    const toInclude = typeof include == 'string' ? [include] : include ? include : [];
 
     const filtered = prices.filter(
         ({ spot_max, spot_min, vcpus, memory, arch, generation, region }) => {
@@ -25,7 +25,7 @@ export default allowCors((req, res) => {
                 (_generation === undefined || _generation === '' || generation === _generation.toLowerCase())
             );
         }
-    );
+    ).map(e => { return { ...e } })
 
     if (toInclude.length > 0) {
         filtered.forEach((price) => {
@@ -33,7 +33,14 @@ export default allowCors((req, res) => {
             const instanceMeta = meta[instance];
 
             toInclude.forEach((include) => {
-                price[include] = instanceMeta[include];
+                const val = instanceMeta[include]
+                // check if is object
+                if (typeof val === 'object') {
+                    price[include] = JSON.stringify(val)
+                }
+                else {
+                    price[include] = val;
+                }
             }
             );
         });

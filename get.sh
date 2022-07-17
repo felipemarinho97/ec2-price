@@ -1,4 +1,5 @@
 #!/bin/bash
+set +o noclobber
 
 curl 'https://instances.vantage.sh/' > /tmp/costs
 curl 'https://instances.vantage.sh/instances.json' > instances/instances.json

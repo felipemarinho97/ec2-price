@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="forms-container">
+
+            <!-- input for filtering instance data -->
+            <!-- maxPrice, minCpu, minMemory, region, arch, generation, sortBy -->
+            <form class="filter-form" id="fileter-form">
+                <!-- form title -->
+                <h1 class="form-title">Filter Instance Data</h1>
+
+                <!-- maxPrice -->
+                <div class="form-group">
+                    <label for="maxPrice">Max Price:</label>
+                    <input type="number" name="maxPrice" placeholder="maxPrice" step="0.0001">
+                </div>
+
+                <!-- minCpu -->
+                <div class="form-group">
+                    <label for="minCpu">Min CPU:</label>
+                    <input type="number" name="minCpu" placeholder="minCpu" step="0.5">
+                </div>
+
+                <!-- minMemory -->
+                <div class="form-group">
+                    <label for="minMemory">Min Memory:</label>
+                    <input type="number" name="minMemory" placeholder="minMemory" step="0.5">
+                </div>
+
+                <!-- region -->
+                <div class="form-group">
+                    <label for="region">Region:</label>
+                    <select name="region" id="region">
+                        <option value="">Any</option>
+                    </select>
+                </div>
+
+                <!-- arch -->
+                <div class="form-group">
+                    <label for="arch">Arch:</label>
+                    <select name="arch" id="arch">
+                        <option value="">Any</option>
+                    </select>
+                </div>
+
+                <!-- generation -->
+                <div class="form-group">
+                    <label for="generation">Generation:</label>
+                    <select name="generation" id="generation">
+                        <option value="">Any</option>
+                    </select>
+                </div>
+
+                <!-- sortBy -->
+                <div class="form-group">
+                    <label for="sortBy">Sort By:</label>
+                    <select name="sortBy" id="sortBy">
+                        <option value="">Any</option>
+                    </select>
+                </div>
+
+                <!-- submit button -->
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+
+
+        </div>
+
+        <br>
+
+
+
+
+        <div class="instances-container">
+            <table id="tb"></table>
+        </div>
+    </div>
+    <script>
+        function buildTable(table, data) {
+            table.innerHTML = "";
+            // add header
+            const sample = data[0];
+            const header = Object.keys(sample);
+            const headerRow = document.createElement('tr');
+            header.forEach(function (key) {
+                const th = document.createElement('th');
+                th.innerText = key;
+                headerRow.appendChild(th);
+            });
+            table.appendChild(headerRow);
+            // create table
+            for (row in data) {
+                const tr = document.createElement('tr');
+                for (col in data[row]) {
+                    const td = document.createElement('td');
+                    td.innerText = data[row][col];
+                    tr.appendChild(td);
+                }
+                table.appendChild(tr);
+            }
+        }
+
+        async function loadOption(field, element) {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', 'api/get-options?field=' + field);
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    const data = JSON.parse(xhr.responseText);
+                    for (row in data) {
+                        const option = document.createElement('option');
+                        option.value = data[row];
+                        option.innerText = data[row];
+                        element.appendChild(option);
+                    }
+                } else {
+                    element.innerHTML = 'Error ' + xhr.status;
+                }
+            }
+            xhr.send();
+        }
+
+        const form = document.getElementById('fileter-form');
+        const table = document.getElementById('tb');
+        form.onsubmit = function (e) {
+            // empty table
+            table.innerHTML = 'Loading..';
+
+            e.preventDefault();
+            // get query string from form
+            const query = new URLSearchParams(new FormData(form));
+            const xhr = new XMLHttpRequest();
+            // add query to url
+            xhr.open('GET', 'api/prices?' + query.toString());
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    const data = JSON.parse(xhr.responseText);
+
+                    buildTable(table, data);
+                } else {
+                    table.innerHTML = 'Error ' + xhr.status;
+                }
+            }
+            xhr.send();
+
+        }
+
+        const region = document.getElementById('region');
+        const arch = document.getElementById('arch');
+        const generation = document.getElementById('generation');
+        const sortBy = document.getElementById('sortBy');
+        loadOption('region', region);
+        loadOption('arch', arch);
+        loadOption('generation', generation);
+        loadOption('sortBy', sortBy);
+    </script>
+    <style>
+        body {
+            font-family: sans-serif;
+            font-size: 15px;
+            background-color: #fafafa;
+
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            border: 1px solid #ddd;
+            overflow: auto;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            max-width: 500px;
+        }
+
+        label {
+            margin-right: 10px;
+        }
+
+        input {
+            margin-bottom: 10px;
+        }
+
+        select {
+            margin-bottom: 10px;
+        }
+
+        input[type="submit"] {
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+        .btn:focus {
+            outline: none;
+        }
+
+        .btn:active {
+            background-color: #45a049;
+        }
+
+        #tb {
+            margin-top: 20px;
+        }
+
+        .form-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .filter-form {
+            margin-bottom: 20px;
+        }
+
+        .filter-form .form-group {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+        }
+
+        .filter-form .form-group label {
+            width: 100px;
+        }
+
+        .filter-form .form-group input {
+            width: 200px;
+        }
+
+        .filter-form .form-group select {
+            width: 150px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+            background-color: white;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+
+        }
+
+        .container>* {
+            margin-bottom: 20px;
+        }
+
+        .container>*:last-child {
+            margin-bottom: 0;
+        }
+
+        .forms-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+        }
+
+        /* add scroll if table is too big */
+        .instances-container {
+            overflow: auto;
+            width: 100%;
+        }
+    </style>
+</body>
+
+</html>

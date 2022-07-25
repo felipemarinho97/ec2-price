@@ -1,0 +1,19 @@
+{
+  "name": "ec2-price",
+  "version": "1.0.0",
+  "description": "A website made for looking up spot prices of EC2 instances.",
+  "main": "index.js",
+  "scripts": {
+    "build": "bash -c ./get.sh && node index.js && node instances/process.js && node calculate.js > /dev/null"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/felipemarinho97/ec2-price.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/felipemarinho97/ec2-price/issues"
+  },
+  "homepage": "https://github.com/felipemarinho97/ec2-price#readme"
+}

@@ -4,10 +4,10 @@ const meta = require('./instance-meta.json');
 
 export default allowCors((req, res) => {
     const {
-        query: { maxPrice, minCpu, minMemory, region, arch, generation, sortBy, include },
+        query: { maxPrice, minCpu, minMemory, region, arch, generation, sortBy, include, limit },
     } = req;
 
-    console.log({ maxPrice, minCpu, minMemory, region, arch, generation, sortBy, include });
+    console.log({ maxPrice, minCpu, minMemory, region, arch, generation, sortBy, include, limit });
     const _arch = arch;
     const _generation = generation;
     const _region = region;
@@ -65,6 +65,13 @@ export default allowCors((req, res) => {
             filtered.sort((a, b) => parseFloat(a[sortBy.toLowerCase()]) - parseFloat(b[sortBy.toLowerCase()]));
         } else {
             filtered.sort((a, b) => a[sortBy.toLowerCase()].localeCompare(b[sortBy.toLowerCase()]));
+        }
+    }
+
+    if (limit) {
+        const limitInt = parseInt(limit);
+        if (limitInt > 0) {
+            filtered.splice(limitInt);
         }
     }
 

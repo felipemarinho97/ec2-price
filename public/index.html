@@ -123,50 +123,59 @@
         }
 
         async function loadOption(field, element) {
-            const xhr = new XMLHttpRequest();
-            xhr.open('GET', 'api/get-options?field=' + field);
-            xhr.onload = function () {
-                if (xhr.status === 200) {
-                    const data = JSON.parse(xhr.responseText);
-                    for (row in data) {
-                        const option = document.createElement('option');
-                        option.value = data[row];
-                        option.innerText = data[row];
-                        element.appendChild(option);
+            return new Promise((res, rej) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', 'api/get-options?field=' + field);
+                xhr.onload = function () {
+                    if (xhr.status === 200) {
+                        const data = JSON.parse(xhr.responseText);
+                        for (row in data) {
+                            const option = document.createElement('option');
+                            option.value = data[row];
+                            option.innerText = data[row];
+                            element.appendChild(option);
+                        }
+                        res();
+                    } else {
+                        element.innerHTML = 'Error ' + xhr.status;
+                        rej();
                     }
-                } else {
-                    element.innerHTML = 'Error ' + xhr.status;
                 }
-            }
-            xhr.send();
+                xhr.send();
+            })
         }
 
         async function addCheckboxes(field, element) {
-            const xhr = new XMLHttpRequest();
-            xhr.open('GET', 'api/get-options?field=' + field);
-            xhr.onload = function () {
-                if (xhr.status === 200) {
-                    const data = JSON.parse(xhr.responseText);
-                    for (row in data) {
-                        const checkbox = document.createElement('input');
-                        checkbox.type = 'checkbox';
-                        checkbox.name = field;
-                        checkbox.value = data[row];
-                        checkbox.id = field + '-' + data[row];
-                        const label = document.createElement('label');
-                        label.htmlFor = field + '-' + data[row];
-                        label.innerText = data[row];
-                        const div = document.createElement('div');
-                        div.className = 'checkbox';
-                        div.appendChild(checkbox);
-                        div.appendChild(label);
-                        element.appendChild(div);
+            return new Promise((res, rej) => {
+
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', 'api/get-options?field=' + field);
+                xhr.onload = function () {
+                    if (xhr.status === 200) {
+                        const data = JSON.parse(xhr.responseText);
+                        for (row in data) {
+                            const checkbox = document.createElement('input');
+                            checkbox.type = 'checkbox';
+                            checkbox.name = field;
+                            checkbox.value = data[row];
+                            checkbox.id = field + '-' + data[row];
+                            const label = document.createElement('label');
+                            label.htmlFor = field + '-' + data[row];
+                            label.innerText = data[row];
+                            const div = document.createElement('div');
+                            div.className = 'checkbox';
+                            div.appendChild(checkbox);
+                            div.appendChild(label);
+                            element.appendChild(div);
+                        }
+                        res();
+                    } else {
+                        element.innerHTML = 'Error ' + xhr.status;
+                        rej();
                     }
-                } else {
-                    element.innerHTML = 'Error ' + xhr.status;
                 }
-            }
-            xhr.send();
+                xhr.send();
+            })
         }
 
         const form = document.getElementById('fileter-form');
@@ -198,13 +207,63 @@
         const arch = document.getElementById('arch');
         const generation = document.getElementById('generation');
         const sortBy = document.getElementById('sortBy');
-        loadOption('region', region);
-        loadOption('arch', arch);
-        loadOption('generation', generation);
-        loadOption('sortBy', sortBy);
-
         const toInclude = document.getElementById('to-include');
-        addCheckboxes('include', toInclude);
+
+        async function load() {
+            return Promise.all([
+                loadOption('region', region),
+                loadOption('arch', arch),
+                loadOption('generation', generation),
+                loadOption('sortBy', sortBy),
+                addCheckboxes('include', toInclude),
+            ])
+        }
+
+        load().then(function () {
+            console.log('loaded');
+            // on form item change, update the selected item on local storage
+            const formItems = document.getElementsByTagName('form')[0].elements;
+            for (item in formItems) {
+                formItems[item].onchange = function () {
+                    // if value is empty, remove from local storage
+                    if (this.value === '') {
+                        localStorage.removeItem(this.name);
+                    } else {
+                        // if item is checkbox, get all checked values
+                        if (this.type === 'checkbox') {
+                            const values = [];
+                            const checkboxes = document.getElementsByName(this.name);
+                            for (checkbox in checkboxes) {
+                                if (checkboxes[checkbox].checked) {
+                                    values.push(checkboxes[checkbox].value);
+                                }
+                            }
+                            localStorage.setItem(this.name, values);
+                        } else {
+                            localStorage.setItem(this.name, this.value);
+                        }
+                    }
+                }
+            }
+
+            // on load, get selected item from local storage
+            for (item in formItems) {
+                if (localStorage.getItem(formItems[item].name)) {
+                    if (formItems[item].type === 'checkbox') {
+                        const values = localStorage.getItem(formItems[item].name);
+                        const checkboxes = document.getElementsByName(formItems[item].name);
+                        for (checkbox in checkboxes) {
+                            if (values.includes(checkboxes[checkbox].value)) {
+                                checkboxes[checkbox].checked = true;
+                            }
+                        }
+                    } else {
+                        formItems[item].value = localStorage.getItem(formItems[item].name);
+                    }
+                }
+            }
+        });
+
     </script>
     <style>
         body {
@@ -372,7 +431,7 @@
         }
     </style>
     <footer>
-        Page generated in <span id="gen-date">2022-07-24</span>. Star this repo on <a
+        Page generated in <span id="gen-date">2022-07-26</span>. Star this repo on <a
             href="https://github.com/felipemarinho97/ec2-price">GitHub</a>
     </footer>
 </body>

@@ -1,6 +1,16 @@
 const { allowCors } = require("../util");
 const prices = require('./best.json')
 
+function sortStringList(list) {
+    list.sort((a, b) => {
+        if (a < b) return -1;
+        if (a > b) return 1;
+        return 0;
+    })
+
+    return list;
+}
+
 export default allowCors((req, res) => {
     const {
         query: { field },
@@ -9,13 +19,13 @@ export default allowCors((req, res) => {
     console.log(field);
 
     if (field === 'sortBy') {
-        res.json(Object.keys(prices[0]));
+        res.json(sortStringList(Object.keys(prices[0])));
         return;
     }
 
     if (field === 'include') {
         const meta = require('./instance-meta.json');
-        res.json(Object.keys(meta['t2.micro']));
+        res.json(sortStringList(Object.keys(meta['t2.micro'])));
         return;
     }
 
@@ -31,5 +41,5 @@ export default allowCors((req, res) => {
         options[value] = 0
     });
 
-    res.json(Object.keys(options));
+    res.json(sortStringList(Object.keys(options)));
 });

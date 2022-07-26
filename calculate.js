@@ -10,6 +10,9 @@ for (let key in spot_prices) {
     for (let key2 in instance) {
         const region = instance[key2]
         const instance_type = imap[key]
+        const spot_avg = (parseFloat(region.spot_min) + parseFloat(region.spot_max)) / 2
+        // round avg to 5 decimal places
+        const spot_avg_rounded = Math.round(spot_avg * 100000) / 100000
 
         if (region.spot_max != Number.MAX_VALUE && region.spot_min != null) {
             plist.push({
@@ -17,8 +20,8 @@ for (let key in spot_prices) {
                 region: key2,
                 spot_max: parseFloat(region.spot_max),
                 spot_min: parseFloat(region.spot_min),
-                spot_avg: (parseFloat(region.spot_min) + parseFloat(region.spot_max)) / 2,
-                vcpus: instance_type.vCPU,
+                spot_avg: spot_avg_rounded,
+                vcpus: instance_type.vcpu,
                 memory: instance_type.memory,
                 arch: instance_type.arch[0],
                 generation: instance_type.generation

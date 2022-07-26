@@ -4,10 +4,18 @@ const fs = require('fs')
 // transform into a map
 let iMap = {}
 
+function lowerCaseObjectKeys(obj) {
+    const newObj = {}
+    for (let key in obj) {
+        newObj[key.toLowerCase()] = obj[key]
+    }
+    return newObj
+}
+
 instances.forEach(i => {
     delete i.pricing
     delete i.availability_zones
-    iMap[i.instance_type] = i
+    iMap[i.instance_type] = lowerCaseObjectKeys(i)
 })
 
 const imap = JSON.stringify(iMap, null, 2)

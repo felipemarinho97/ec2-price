@@ -7,7 +7,7 @@ export default allowCors((req, res) => {
         query: { maxPrice, minCpu, minMemory, region, arch, generation, sortBy, include },
     } = req;
 
-    console.log(maxPrice, minCpu, minMemory, region, arch, generation, sortBy);
+    console.log({ maxPrice, minCpu, minMemory, region, arch, generation, sortBy, include });
     const _arch = arch;
     const _generation = generation;
     const _region = region;
@@ -26,6 +26,11 @@ export default allowCors((req, res) => {
             );
         }
     ).map(e => { return { ...e } })
+
+    if (filtered.length === 0) {
+        res.status(404).json({ message: "Not found" });
+        return;
+    }
 
     if (toInclude.length > 0) {
         filtered.forEach((price) => {
@@ -47,18 +52,20 @@ export default allowCors((req, res) => {
     }
 
     if (sortBy) {
+        const field = filtered[0]
+        console.log(field);
+        if (field == null || field[sortBy] == null) {
+            // skip sort
+            res.json(filtered)
+            return;
+        }
+
         // check if is numeric
-        if (!isNaN(parseFloat(prices[0][sortBy]))) {
-            filtered.sort((a, b) => a[sortBy.toLowerCase()] - b[sortBy.toLowerCase()]);
+        if (!isNaN(parseFloat(field[sortBy]))) {
+            filtered.sort((a, b) => parseFloat(a[sortBy.toLowerCase()]) - parseFloat(b[sortBy.toLowerCase()]));
         } else {
             filtered.sort((a, b) => a[sortBy.toLowerCase()].localeCompare(b[sortBy.toLowerCase()]));
         }
-    }
-
-
-    if (filtered.length === 0) {
-        res.status(404).json({ message: "Not found" });
-        return;
     }
 
     res.json(filtered);

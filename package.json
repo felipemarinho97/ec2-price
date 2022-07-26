@@ -4,7 +4,7 @@
   "description": "A website made for looking up spot prices of EC2 instances.",
   "main": "index.js",
   "scripts": {
-    "build": "bash -c ./get.sh && node index.js && node instances/process.js && node calculate.js > /dev/null"
+    "build": "make build"
   },
   "repository": {
     "type": "git",

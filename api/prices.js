@@ -52,19 +52,39 @@ export default allowCors((req, res) => {
     }
 
     if (sortBy) {
+        let sortByLower = sortBy.toLowerCase();
+        let direction = 'asc';
+        if (sortByLower.charAt(0) === '-') {
+            direction = 'desc';
+            sortByLower = sortBy.substring(1);
+        } else if (sortByLower.charAt(0) === '+') {
+            sortByLower = sortBy.substring(1);
+        }
         const field = filtered[0]
-        console.log(field);
-        if (field == null || field[sortBy] == null) {
-            // skip sort
-            res.json(filtered)
+        if (field == null || field[sortByLower] == null) {
+            res.status(404).json({ message: `Field ${sortByLower} not found` });
             return;
         }
 
         // check if is numeric
-        if (!isNaN(parseFloat(field[sortBy]))) {
-            filtered.sort((a, b) => parseFloat(a[sortBy.toLowerCase()]) - parseFloat(b[sortBy.toLowerCase()]));
+        if (!isNaN(parseFloat(field[sortByLower]))) {
+            filtered.sort((a, b) => {
+                let vals = [parseFloat(a[sortByLower]), parseFloat(b[sortByLower])];
+                if (direction === 'asc') {
+                    return vals[0] - vals[1];
+                }
+
+                return vals[1] - vals[0];
+            });
         } else {
-            filtered.sort((a, b) => a[sortBy.toLowerCase()].localeCompare(b[sortBy.toLowerCase()]));
+            filtered.sort((a, b) => {
+                let vals = [a[sortByLower], b[sortByLower]];
+                if (direction === 'asc') {
+                    return vals[0].localeCompare(vals[1]);
+                }
+
+                return vals[1].localeCompare(vals[0]);
+            });
         }
     }
 

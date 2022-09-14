@@ -1,0 +1,77 @@
+#!/bin/bash
+
+function to_table() {
+  jq -r '(map(keys) | add | unique) as $cols | map(. as $row | $cols | map($row[.])) as $rows | $cols, $rows[] | @tsv' | column -t -s $'\t'
+}
+
+API='https://ec2-price.vercel.app/api/prices?'
+LIMIT=21
+
+## iterate over argumments: --region --min-cpu --min-memory --max-price
+while [[ $# -gt 0 ]]; do
+    key="$1"
+
+    case $key in
+        --region)
+            REGION="$2"
+            API="$API""region=$REGION&"
+            shift # past argument
+            ;;
+        --min-cpu)
+            MIN_CPU="$2"
+            API="$API""minCpu=$MIN_CPU&"
+            shift # past argument
+            ;;
+        --min-memory)
+            MIN_MEMORY="$2"
+            API="$API""minMemory=$MIN_MEMORY&"
+            shift # past argument
+            ;;
+        --max-price)
+            MAX_PRICE="$2"
+            API="$API""maxPrice=$MAX_PRICE&"
+            shift # past argument
+            ;;
+        --arch)
+            ARCH="$2"
+            API="$API""arch=$ARCH&"
+            shift # past argument
+            ;;
+        --include)
+            INCLUDE="$2"
+            # split
+            IFS=',' read -ra INCLUDE_ARRAY <<< "$INCLUDE"
+            for i in "${INCLUDE_ARRAY[@]}"; do
+                API="$API""include=$i&"
+            done
+            shift # past argument
+            ;;
+        --sort-by)
+            SORT="$2"
+            API="$API""sortBy=$SORT&"
+            shift # past argument
+            ;;
+        --limit)
+            LIMIT="$2"
+            ## add more 1 to the limit
+            LIMIT=$((LIMIT+1))
+            shift # past argument
+            ;;
+        *)
+            # unknown option
+            ;;
+    esac
+    shift # past argument or value
+done
+
+function main() {
+    # to table using jq
+    curl -s $API | to_table
+}
+
+# if limit is set, use limit
+if [ -n "$LIMIT" ]; then
+    main | head -n $LIMIT
+else
+    main
+fi

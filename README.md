@@ -24,6 +24,8 @@ There is a CLI for `ec2-price`. It is a simple wrapper around the API. You can i
 $ curl -sL https://raw.githubusercontent.com/felipemarinho97/ec2-price/master/ec2-price | tee ~/.local/bin/ec2-price > /dev/null
 ```
 
+You will need to have `~/.local/bin` in your `PATH` and `jq` [[see]](https://stedolan.github.io/jq/download/) installed for the command to work.
+
 ## Usage example
 
 ```bash

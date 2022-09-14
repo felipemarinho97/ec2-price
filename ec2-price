@@ -53,8 +53,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         --limit)
             LIMIT="$2"
-            ## add more 1 to the limit
-            LIMIT=$((LIMIT+1))
+            API="$API""limit=$LIMIT&"
             shift # past argument
             ;;
         *)
@@ -69,9 +68,4 @@ function main() {
     curl -s $API | to_table
 }
 
-# if limit is set, use limit
-if [ -n "$LIMIT" ]; then
-    main | head -n $LIMIT
-else
-    main
-fi
+main

@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/felipemarinho97/ec2-price/issues"
   },
-  "homepage": "https://github.com/felipemarinho97/ec2-price#readme"
+  "homepage": "https://github.com/felipemarinho97/ec2-price#readme",
+  "dependencies": {
+    "lodash": "^4.17.21"
+  }
 }

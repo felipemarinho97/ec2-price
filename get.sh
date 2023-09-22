@@ -1,13 +1,7 @@
 #!/bin/bash
 set +o noclobber
 
-curl 'https://instances.vantage.sh/' > /tmp/costs
+cat regions.json | jq -r '.[]' | while read region; do
+  curl "https://instances.vantage.sh/pricing_${region}.json" > instances/pricing/pricing_${region}.json
+done
 curl 'https://instances.vantage.sh/instances.json' > instances/instances.json
-
-cat /tmp/costs | grep 'var _pricing' > /tmp/pricing.js
-
-echo 'console.log(JSON.stringify(_pricing))' > /tmp/t.js
-
-cat /tmp/pricing.js /tmp/t.js > /tmp/u.js
-
-node /tmp/u.js > out.json
